@@ -3,35 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hexa Calculator</title>
+    <title>MSM Hexa Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 400px;
+            margin: 60px auto;
+            padding: 0 20px;
+        }
+        h1 {
+            font-size: 1.4rem;
+            margin-bottom: 24px;
+        }
+        label {
+            display: block;
+            margin-top: 14px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            margin-top: 4px;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+        button {
+            margin-top: 20px;
+            width: 100%;
+            padding: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 1.1rem;
+        }
+        #error {
+            margin-top: 12px;
+            color: red;
+            font-size: 0.9rem;
+        }
+    </style>
 </head>
 <body>
+    <h1>MSM Hexa Calculator</h1>
     <form id="hexa-form">
-        <input type="text" id="hexInput" placeholder="Enter hex value" required>
-        <button type="submit">Submit</button>
+        <label for="target_main">TARGET_MAIN</label>
+        <input type="number" id="target_main" placeholder="Min: 7" required>
+
+        <label for="target_sub">TARGET_SUB</label>
+        <input type="number" id="target_sub" placeholder="Min: 9" required>
+
+        <label for="current_main">CURRENT_MAIN</label>
+        <input type="number" id="current_main" placeholder="Min: 3" required>
+
+        <label for="current_sub_1">CURRENT_SUB_1</label>
+        <input type="number" id="current_sub_1" placeholder="Enter value" required>
+
+        <label for="current_sub_2">CURRENT_SUB_2</label>
+        <input type="number" id="current_sub_2" placeholder="Enter value" required>
+
+        <button type="submit">Calculate</button>
     </form>
+
+    <div id="error"></div>
+    <div id="result"></div>
+
     <script>
         document.getElementById('hexa-form').addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent the default form submission
-            
-            const hexValue = document.getElementById('hexInput').value;
+            event.preventDefault();
 
-            // Call your Python backend function here
-            fetch('http://your-backend-url/api/call-function', {
+            document.getElementById('error').textContent = '';
+            document.getElementById('result').textContent = '';
+
+            const payload = {
+                target_main:  parseInt(document.getElementById('target_main').value),
+                target_sub:   parseInt(document.getElementById('target_sub').value),
+                current_main: parseInt(document.getElementById('current_main').value),
+                current_sub_1: parseInt(document.getElementById('current_sub_1').value),
+                current_sub_2: parseInt(document.getElementById('current_sub_2').value)
+            };
+
+            fetch('http://localhost:5000/api/calculate', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ hexValue: hexValue }),
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
             })
             .then(response => response.json())
             .then(data => {
-                console.log('Success:', data);
-                // Handle success response
+                if (data.success) {
+                    document.getElementById('result').textContent = 'Probability: ' + data.probability + '%';
+                } else {
+                    document.getElementById('error').textContent = 'Error: ' + data.error;
+                }
             })
-            .catch((error) => {
-                console.error('Error:', error);
-                // Handle error response
+            .catch(() => {
+                document.getElementById('error').textContent = 'Could not connect to the backend. Make sure app.py is running.';
             });
         });
     </script>
