@@ -16,15 +16,24 @@ def calculate_probability(target_main, target_sub, current_main, current_sub_1, 
     Main stat is weighted at 50%, and the two sub stats split the remaining 50%.
     """
     prob = 0
-    prob_adjust = {7:1, 8: 0.15/0.2, 9: 0.5 * .5 / .2, 10: 0.25 * 0.5}
+    adjust_8 = 0.15/0.2
+    adjust_9 = adjust_8 * 0.1 / 0.2
+    adjust_10 = adjust_9 * 0.05 / 0.2
+    prob_adjust = {7: 1, 8: adjust_8, 9: adjust_9, 10: adjust_10}
 
     combo = [current_main, current_sub_1, current_sub_2]
     left = 20 - np.sum(combo)
 
     for i in range(target_main,11):
         steps = i - combo[0]
+
         prob_to_add = pow(0.2, steps) * pow(.8, left-steps) * math.comb(left,steps)
-        prob += prob_to_add * prob_adjust[i]
+        prob_mul = 1
+        if i == 9:
+            prob_mul = ((0.85 / 0.8) ** int((left - steps) / steps))
+        if i == 10:
+            prob_mul = ((0.9 / 0.8) ** int((left - steps) / steps))
+        prob += prob_to_add * prob_adjust[i]*prob_mul
 
     if target_sub <=10:
         for j in range(target_sub, max(20-combo[0]-combo[2]+1, 11)):
