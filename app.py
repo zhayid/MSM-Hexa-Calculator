@@ -3,7 +3,7 @@ from flask_cors import CORS
 import math
 import numpy as np
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins="*")
 
 
 def calculate_probability(target_main, target_sub, current_main, current_sub_1, current_sub_2):
